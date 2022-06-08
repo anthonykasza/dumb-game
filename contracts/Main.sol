@@ -37,23 +37,21 @@ contract Game {
   address[maxPlayers] public players;
   mapping (address => Player) public ownerToPlayer;
   uint public playerCount = 0;
-  uint public losers = 0;
   address public winner;
 
   // TODO: set params at contract creation instead of using constants
   constructor() {}
 
   function registerPlayer(uint _ak, uint _de, uint _ag, uint _hp) public payable returns (bool) {
-    // players can register themselves with 0 HP then re-register themselves with different stats after they see how other players have registered.
-    //  however this would cost them their luck points and they'd have to pay more to play the game
+    require (_hp > 0, "cannot create a dead player");
     require(ownerToPlayer[msg.sender].hp == 0, "you are already playing the game");
     require(playerCount <= maxPlayers, "max players already playing the game");
     require(_ak.add(_de).add(_ag).add(_hp) <= playerAllowance, "you're stats are over the allowance");
     require(msg.value >= gameCost, "it costs more than that to play the game");
     require(gameState == 0, "game has already begun");
 
-    // for some reason safemath doesn't work when calling `0.add(1)`
     players[playerCount] = msg.sender;
+    // for some reason safemath doesn't work when calling `0.add(1)`
     playerCount += 1;
 
     ownerToPlayer[msg.sender] = Player({
@@ -78,6 +76,7 @@ contract Game {
   function hit(address _target) public {
     require(gameState == 1);
     require(ownerToPlayer[msg.sender].hp > 0);
+    require(_target != msg.sender, "stop hitting yourself");
 
     Player storage defendingPlayer = ownerToPlayer[_target];
     Player storage attackingPlayer = ownerToPlayer[msg.sender];
@@ -89,15 +88,29 @@ contract Game {
 
     if (damage >= defendingPlayer.hp) {
       defendingPlayer.hp = 0;
-      losers += 1;
-      if (losers == maxPlayers.sub(1)) {
-        gameState = 2;
-        winner = msg.sender;
-        payable(winner).transfer(address(this).balance);
-      }
+      checkForWinner();
     } else {
       defendingPlayer.hp.sub(damage);
     }
   }
+
+
+  function checkForWinner() public {
+    require(gameState == 1, "game is not in a playable state");
+    require(winner == address(0x0), "game is over. call winner() getter function to see who won");
+    uint loserCount = 0;
+    for (uint i=0; i<maxPlayers; i++) {
+      address playerAddress = players[i];
+      if (ownerToPlayer[playerAddress].hp == 0) {
+        loserCount++;
+      }
+    }
+    if (loserCount == maxPlayers.sub(1)) {
+      gameState = 2;
+      winner = msg.sender;
+      payable(winner).transfer(address(this).balance);
+    }
+  }
+
 
 }

@@ -41,19 +41,6 @@ def test_cost_fail():
   except:
     assert True
 
-def test_loser():
-  game = Game.deploy({'from': accounts[0]})
-
-  game.registerPlayer(13, 1, 1, 1, {'from': accounts[3], 'value': '10 wei'})
-  game.registerPlayer(12, 1, 1, 1, {'from': accounts[2], 'value': '10 wei'})
-  game.registerPlayer(11, 1, 1, 1, {'from': accounts[1], 'value': '10 wei'})
-  game.registerPlayer(10, 1, 1, 1, {'from': accounts[0], 'value': '10 wei'})
-
-  game.hit(accounts[0], {'from':accounts[1]})
-  game.ownerToPlayer(accounts[0])
-  assert game.losers() == 1
-
-
 def test_winner():
   game = Game.deploy({'from': accounts[0]})
 
