@@ -53,3 +53,21 @@ def test_winner():
   game.hit(accounts[2], {'from':accounts[1]})
   game.hit(accounts[3], {'from':accounts[1]})
   assert game.winner() == accounts[1]
+
+def test_winner_gets_paid():
+  game = Game.deploy({'from': accounts[0]})
+
+  game.registerPlayer(13, 1, 1, 1, {'from': accounts[3], 'value': '10 wei'})
+  game.registerPlayer(12, 1, 1, 1, {'from': accounts[2], 'value': '10 wei'})
+  game.registerPlayer(11, 1, 1, 1, {'from': accounts[1], 'value': '10 wei'})
+  game.registerPlayer(10, 1, 1, 1, {'from': accounts[0], 'value': '10 wei'})
+
+  start_balance = accounts[1].balance()
+
+  game.hit(accounts[0], {'from':accounts[1]})
+  game.hit(accounts[2], {'from':accounts[1]})
+  game.hit(accounts[3], {'from':accounts[1]})
+
+  stop_balance = accounts[1].balance()
+
+  assert start_balance < stop_balance
