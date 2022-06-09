@@ -12,6 +12,8 @@ contract Game {
   // 2 -> game is over
   uint public gameState = 0;
 
+  enum PlayerStates { READY, BRACED, LUNGED }
+
   struct Player {
     // attack. how much damage you inflict
     uint ak;
@@ -26,11 +28,17 @@ contract Game {
     uint hp;
 
     // how lucky you are. players are rewarded for registering early.
-    // because players that register later are able to see their stats.
+    // because players that register later are able to see their opponents stats.
     uint luck;
+
+    // the state of the player
+    PlayerStates playerState;
+
+    // the block in which the player took its previous action
+    uint prevActionBlock;
   }
   
-  uint constant playerAllowance = 20;
+  uint constant statsAllowance = 20;
   uint constant maxPlayers = 4;
   uint256 constant gameCost = 5 wei;
 
@@ -39,6 +47,12 @@ contract Game {
   uint public playerCount = 0;
   address public winner;
 
+  modifier canAct () {
+    require(ownerToPlayer[msg.sender].hp > 0, "you're zed. zed's dead baby.");
+    require(gameState == 1, "the game isn't playable");
+    _;
+  }
+
   // TODO: set params at contract creation instead of using constants
   constructor() {}
 
@@ -46,7 +60,7 @@ contract Game {
     require (_hp > 0, "cannot create a dead player");
     require(ownerToPlayer[msg.sender].hp == 0, "you are already playing the game");
     require(playerCount <= maxPlayers, "max players already playing the game");
-    require(_ak.add(_de).add(_ag).add(_hp) <= playerAllowance, "you're stats are over the allowance");
+    require(_ak.add(_de).add(_ag).add(_hp) <= statsAllowance, "you're stats are over the player allowance");
     require(msg.value >= gameCost, "it costs more than that to play the game");
     require(gameState == 0, "game has already begun");
 
@@ -59,7 +73,9 @@ contract Game {
       de: _de,
       ag: _ag,
       hp: _hp,
-      luck: maxPlayers.sub(playerCount)
+      luck: maxPlayers.sub(playerCount),
+      playerState: PlayerStates.READY,
+      prevActionBlock: 0
     });
 
     if (playerCount == maxPlayers) {
@@ -69,22 +85,60 @@ contract Game {
     return true;
   }
 
-  // TODO: incorporate agility so that each player's actions are throttled based on how many blocks have passed
-  // TODO: create more actions besides `hit`, like `brace` which would reduce damage
+  function brace() canAct public {
+    Player storage bracingPlayer = ownerToPlayer[msg.sender];
 
-  // what happens when a player is targeted by multiple hits in a single block?
-  function hit(address _target) public {
-    require(gameState == 1);
-    require(ownerToPlayer[msg.sender].hp > 0);
+    if (bracingPlayer.playerState == PlayerStates.BRACED) {
+      if (block.number - bracingPlayer.prevActionBlock > 5) {
+        bracingPlayer.playerState = PlayerStates.READY;
+      }
+    }
+    require(bracingPlayer.playerState == PlayerStates.READY, "you're already braced, wait a few blocks");
+
+    if (bracingPlayer.playerState == PlayerStates.LUNGED) {
+      if (block.number - bracingPlayer.prevActionBlock >= statsAllowance - bracingPlayer.ag) {
+        bracingPlayer.playerState = PlayerStates.READY;
+      }
+    }
+    require(bracingPlayer.playerState == PlayerStates.READY, "you just hit somebody, stay LUNGED for a while");
+
+    bracingPlayer.playerState = PlayerStates.BRACED;
+    bracingPlayer.prevActionBlock = block.number;
+  }
+
+  function hit(address _target) canAct public {
     require(_target != msg.sender, "stop hitting yourself");
+    require(ownerToPlayer[_target].hp > 0, "no sense in beating a dead horse");
+
+    Player storage attackingPlayer = ownerToPlayer[msg.sender];
+    if (attackingPlayer.playerState == PlayerStates.LUNGED) {
+      if (block.number - attackingPlayer.prevActionBlock >= statsAllowance - attackingPlayer.ag) {
+        attackingPlayer.playerState = PlayerStates.READY;
+      }
+    }
+    require(attackingPlayer.playerState == PlayerStates.READY, "you ain't READY to hit nobody");
 
     Player storage defendingPlayer = ownerToPlayer[_target];
-    Player storage attackingPlayer = ownerToPlayer[msg.sender];
+    if (defendingPlayer.playerState == PlayerStates.BRACED) {
+      if (block.number - defendingPlayer.prevActionBlock > 5) {
+        defendingPlayer.playerState = PlayerStates.READY;
+      }
+    }
 
     // TODO: do something with luck involving random numbers such that hits could miss
     uint offensePoints = attackingPlayer.ak.add(attackingPlayer.luck);
     uint defensePoints = defendingPlayer.de.add(defendingPlayer.luck);
-    uint damage = offensePoints.sub(defensePoints);
+
+    uint damage = 0;
+    if (defendingPlayer.playerState == PlayerStates.BRACED && defensePoints > 0) {
+      damage = offensePoints.div(defensePoints);
+    } else {
+      damage = offensePoints.sub(defensePoints);
+    }
+
+    defendingPlayer.playerState == PlayerStates.READY;
+    attackingPlayer.playerState = PlayerStates.LUNGED;
+    attackingPlayer.prevActionBlock = block.number;
 
     if (damage >= defendingPlayer.hp) {
       defendingPlayer.hp = 0;
