@@ -88,18 +88,8 @@ contract Game {
   function brace() canAct public {
     Player storage bracingPlayer = ownerToPlayer[msg.sender];
 
-    if (bracingPlayer.playerState == PlayerStates.BRACED) {
-      if (block.number - bracingPlayer.prevActionBlock > 5) {
-        bracingPlayer.playerState = PlayerStates.READY;
-      }
-    }
+    updatePlayerState(bracingPlayer);
     require(bracingPlayer.playerState == PlayerStates.READY, "you're already braced, wait a few blocks");
-
-    if (bracingPlayer.playerState == PlayerStates.LUNGED) {
-      if (block.number - bracingPlayer.prevActionBlock >= statsAllowance - bracingPlayer.ag) {
-        bracingPlayer.playerState = PlayerStates.READY;
-      }
-    }
     require(bracingPlayer.playerState == PlayerStates.READY, "you just hit somebody, stay LUNGED for a while");
 
     bracingPlayer.playerState = PlayerStates.BRACED;
@@ -111,19 +101,11 @@ contract Game {
     require(ownerToPlayer[_target].hp > 0, "no sense in beating a dead horse");
 
     Player storage attackingPlayer = ownerToPlayer[msg.sender];
-    if (attackingPlayer.playerState == PlayerStates.LUNGED) {
-      if (block.number - attackingPlayer.prevActionBlock >= statsAllowance - attackingPlayer.ag) {
-        attackingPlayer.playerState = PlayerStates.READY;
-      }
-    }
+    updatePlayerState(attackingPlayer);
     require(attackingPlayer.playerState == PlayerStates.READY, "you ain't READY to hit nobody");
 
     Player storage defendingPlayer = ownerToPlayer[_target];
-    if (defendingPlayer.playerState == PlayerStates.BRACED) {
-      if (block.number - defendingPlayer.prevActionBlock > 5) {
-        defendingPlayer.playerState = PlayerStates.READY;
-      }
-    }
+    updatePlayerState(defendingPlayer);
 
     // TODO: do something with luck involving random numbers such that hits could miss
     uint offensePoints = attackingPlayer.ak.add(attackingPlayer.luck);
@@ -148,6 +130,18 @@ contract Game {
     }
   }
 
+  function updatePlayerState(Player storage _player) internal {
+    uint braceDuration = 5;
+    if (_player.playerState == PlayerStates.LUNGED) {
+      if (block.number - _player.prevActionBlock >= statsAllowance - _player.ag) {
+        _player.playerState = PlayerStates.READY;
+      }
+    } else if (_player.playerState == PlayerStates.BRACED) {
+      if (block.number - _player.prevActionBlock > braceDuration) {
+       _player.playerState = PlayerStates.READY;
+      }
+    }
+  }
 
   function checkForWinner() public {
     require(gameState == 1, "game is not in a playable state");
