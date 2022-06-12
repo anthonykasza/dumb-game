@@ -8,7 +8,7 @@ LUNGED = 2
 
 
 def test_READY():
-  game = Game.deploy({'from': accounts[0]})
+  game = Game.deploy(20, 4, '5 wei', {'from': accounts[0]})
   game.registerPlayer(13, 1, 1, 1, {'from': accounts[3], 'value': '10 wei'})
   game.registerPlayer(12, 1, 1, 1, {'from': accounts[2], 'value': '10 wei'})
   game.registerPlayer(11, 1, 1, 1, {'from': accounts[1], 'value': '10 wei'})
@@ -17,7 +17,7 @@ def test_READY():
   assert game.ownerToPlayer(accounts[0])[player_struct.index("playerState")] == READY
 
 def test_LUNGED():
-  game = Game.deploy({'from': accounts[0]})
+  game = Game.deploy(20, 4, '5 wei', {'from': accounts[0]})
   game.registerPlayer(13, 1, 1, 1, {'from': accounts[3], 'value': '10 wei'})
   game.registerPlayer(12, 1, 1, 1, {'from': accounts[2], 'value': '10 wei'})
   game.registerPlayer(11, 1, 1, 1, {'from': accounts[1], 'value': '10 wei'})
@@ -28,7 +28,7 @@ def test_LUNGED():
   assert game.ownerToPlayer(accounts[1])[player_struct.index("playerState")] == LUNGED
 
 def test_BRACED():
-  game = Game.deploy({'from': accounts[0]})
+  game = Game.deploy(20, 4, '5 wei', {'from': accounts[0]})
   game.registerPlayer(13, 1, 1, 1, {'from': accounts[3], 'value': '10 wei'})
   game.registerPlayer(12, 1, 1, 1, {'from': accounts[2], 'value': '10 wei'})
   game.registerPlayer(11, 1, 1, 1, {'from': accounts[1], 'value': '10 wei'})
@@ -39,7 +39,7 @@ def test_BRACED():
   assert game.ownerToPlayer(accounts[1])[player_struct.index("playerState")] == BRACED
 
 def test_reLUNGED():
-  game = Game.deploy({'from': accounts[0]})
+  game = Game.deploy(20, 4, '5 wei', {'from': accounts[0]})
   game.registerPlayer(13, 1, 1, 1, {'from': accounts[3], 'value': '10 wei'})
   game.registerPlayer(12, 1, 1, 1, {'from': accounts[2], 'value': '10 wei'})
   game.registerPlayer(11, 1, 1, 1, {'from': accounts[1], 'value': '10 wei'})
@@ -55,7 +55,7 @@ def test_reLUNGED():
     assert False
 
 def test_reBRACED():
-  game = Game.deploy({'from': accounts[0]})
+  game = Game.deploy(20, 4, '5 wei', {'from': accounts[0]})
   game.registerPlayer(13, 1, 1, 1, {'from': accounts[3], 'value': '10 wei'})
   game.registerPlayer(12, 1, 1, 1, {'from': accounts[2], 'value': '10 wei'})
   game.registerPlayer(11, 1, 1, 1, {'from': accounts[1], 'value': '10 wei'})
@@ -72,7 +72,7 @@ def test_reBRACED():
 
 
 def test_already_playing_fail():
-  game = Game.deploy({'from': accounts[0]})
+  game = Game.deploy(20, 4, '5 wei', {'from': accounts[0]})
   game.registerPlayer(13, 1, 1, 1, {'from': accounts[3], 'value': '10 wei'})
   try:
     game.registerPlayer(12, 1, 1, 1, {'from': accounts[3], 'value': '10 wei'})
@@ -81,7 +81,7 @@ def test_already_playing_fail():
 
 
 def test_max_players_fail():
-  game = Game.deploy({'from': accounts[0]})
+  game = Game.deploy(20, 4, '5 wei', {'from': accounts[0]})
   game.registerPlayer(13, 1, 1, 1, {'from': accounts[3], 'value': '10 wei'})
   game.registerPlayer(12, 1, 1, 1, {'from': accounts[2], 'value': '10 wei'})
   game.registerPlayer(11, 1, 1, 1, {'from': accounts[1], 'value': '10 wei'})
@@ -92,27 +92,27 @@ def test_max_players_fail():
     assert True
 
 def test_allowance_pass():
-  game = Game.deploy({'from': accounts[0]})
+  game = Game.deploy(20, 4, '5 wei', {'from': accounts[0]})
   game.registerPlayer(1, 1, 1, 1, {'from': accounts[0], 'value': '10 wei'})
   game.registerPlayer(1, 1, 1, 17, {'from': accounts[1], 'value': '10 wei'})
   assert game.playerCount() == 2
 
 def test_allowance_fail():
-  game = Game.deploy({'from': accounts[0]})
+  game = Game.deploy(20, 4, '5 wei', {'from': accounts[0]})
   try:
     game.registerPlayer(1, 1, 1, 18, {'from': accounts[1], 'value': '10 wei'})
   except:
     assert True
 
 def test_cost_fail():
-  game = Game.deploy({'from': accounts[0]})
+  game = Game.deploy(20, 4, '5 wei', {'from': accounts[0]})
   try:
     game.registerPlayer(1, 1, 1, 18, {'from': accounts[1], 'value': '1 wei'})
   except:
     assert True
 
 def test_winner():
-  game = Game.deploy({'from': accounts[0]})
+  game = Game.deploy(20, 4, '5 wei', {'from': accounts[0]})
   game.registerPlayer(13, 1, 1, 1, {'from': accounts[3], 'value': '10 wei'})
   game.registerPlayer(12, 1, 1, 1, {'from': accounts[2], 'value': '10 wei'})
   game.registerPlayer(11, 1, 1, 1, {'from': accounts[1], 'value': '10 wei'})
@@ -126,7 +126,7 @@ def test_winner():
   assert game.winner() == accounts[1]
 
 def test_hit_too_fast():
-  game = Game.deploy({'from': accounts[0]})
+  game = Game.deploy(20, 4, '5 wei', {'from': accounts[0]})
   game.registerPlayer(13, 1, 1, 1, {'from': accounts[3], 'value': '10 wei'})
   game.registerPlayer(12, 1, 1, 1, {'from': accounts[2], 'value': '10 wei'})
   game.registerPlayer(11, 1, 1, 1, {'from': accounts[1], 'value': '10 wei'})
@@ -139,7 +139,7 @@ def test_hit_too_fast():
 
 
 def test_winner_gets_paid():
-  game = Game.deploy({'from': accounts[0]})
+  game = Game.deploy(20, 4, '5 wei', {'from': accounts[0]})
 
   game.registerPlayer(13, 1, 1, 1, {'from': accounts[3], 'value': '10 wei'})
   game.registerPlayer(12, 1, 1, 1, {'from': accounts[2], 'value': '10 wei'})

@@ -7,7 +7,7 @@ BRACED = 1
 LUNGED = 2
 
 def test_bot():
-  game = Game.deploy({'from': accounts[0]})
+  game = Game.deploy(20, 4, '5 wei', {'from': accounts[0]})
 
   game.registerPlayer(1, 1, 1, 13, {'from': accounts[3], 'value': '10 wei'})
   game.registerPlayer(1, 1, 1, 12, {'from': accounts[2], 'value': '10 wei'})
