@@ -1,5 +1,5 @@
 from brownie import accounts, Game, chain
-from scripts.aggro_bot import Aggro
+from bots.aggro_bot import Aggro
 
 player_struct = ["ak", "de", "ag", "hp", "luck", "playerState", "prevActionBlock"]
 READY = 0

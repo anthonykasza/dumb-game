@@ -107,7 +107,12 @@ contract Game {
     Player storage defendingPlayer = ownerToPlayer[_target];
     updatePlayerState(defendingPlayer);
 
-    // TODO: do something with luck involving random numbers such that hits could miss
+    // TODO: based on a player's luck a hit can result in 3 outcomes:
+    //  1. a hit misses the defending player. The attacking player still ends up LUNGED
+    //  2. a hit disregards the defending player's BRACE status and defense points. A direct hit.
+    //  3. a hit which incorporates the defending player's BRACE status and defense points. A normal hit.
+    // TODO: consider how this randomness will affect tests.. maybe we can seed chainlink VRF?
+
     uint offensePoints = attackingPlayer.ak.add(attackingPlayer.luck);
     uint defensePoints = defendingPlayer.de.add(defendingPlayer.luck);
 
