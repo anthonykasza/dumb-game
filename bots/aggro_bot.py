@@ -1,4 +1,4 @@
-
+from bots.base_bot import Bot
 from brownie import accounts, Game, chain
 import time
 
@@ -7,34 +7,13 @@ READY = 0
 BRACED = 1
 LUNGED = 2
 
-class Aggro():
+class Aggro(Bot):
   def __init__(self, game_addr, my_account):
-    self.game = Game.at(game_addr)
-    self.my_account = my_account
-    self.opponents = []
-    self.active_target = None
+    super().__init__(game_addr, my_account)
     self.ak = 10
     self.de = 0
     self.ag = 5
     self.hp = 5
-
-
-  def register(self):
-    self.game.registerPlayer(self.ak, self.de, self.ag, self.hp, {'from': self.my_account, 'value': '10 wei'})
-    while True:
-      if (self.game.gameState() != 1):
-        time.sleep(1)
-      break
-    return
-
-
-  def orient(self):
-    player_count = self.game.playerCount()
-    self.opponents = {self.game.players(i): self.game.ownerToPlayer(self.game.players(i)) for i in range(player_count) if self.game.players(i) != self.my_account.address}
-    for a, o in self.opponents.items():
-      if o[player_struct.index("hp")] <= 0:
-        self.opponents.pop(a)
-
 
   def select_target(self):
     weakest = None;
@@ -51,7 +30,3 @@ class Aggro():
       self.active_target = weakest
     else:
       self.active_target = random.choice(opponents.keys())
-
-
-  def hit(self):
-    self.game.hit(self.active_target, {'from':self.my_account})
