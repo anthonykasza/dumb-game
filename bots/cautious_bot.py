@@ -7,7 +7,7 @@ READY = 0
 BRACED = 1
 LUNGED = 2
 
-class Cautious():
+class Cautious(Bot):
   def __init__(self, game_addr, my_account):
     super().__init__(game_addr, my_account)
     self.ak = 1
