@@ -1,3 +1,4 @@
+import random
 from bots.base_bot import Bot
 from brownie import accounts, Game, chain
 import time
@@ -8,8 +9,8 @@ BRACED = 1
 LUNGED = 2
 
 class Aggro(Bot):
-  def __init__(self, game_addr, my_account):
-    super().__init__(game_addr, my_account)
+  def __init__(self, **kw):
+    super().__init__(**kw)
     self.ak = 10
     self.de = 0
     self.ag = 5

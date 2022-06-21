@@ -1,5 +1,5 @@
 from brownie import accounts, Game, chain
-from bots.aggro_bot import Aggro
+from bots.cautious_bot import Cautious
 
 player_struct = ["ak", "de", "ag", "hp", "luck", "playerState", "prevActionBlock"]
 READY = 0
@@ -17,11 +17,10 @@ def test_bot():
   game.registerPlayer(1, 1, 1, 12, {'from': accounts[2], 'value': '10 wei'})
   game.registerPlayer(10, 1, 1, 1, {'from': accounts[1], 'value': '10 wei'})
 
-  bot = Aggro(game_addr=game.address, my_account=accounts[0])
+  bot = Cautious(game_addr=game.address, my_account=accounts[0])
   bot.register()
   bot.orient()
-  bot.select_target()
-  bot.hit()
+  bot.brace()
+  chain.mine(1)
 
-  assert (game.ownerToPlayer(accounts[1])[player_struct.index("hp")] == 0 and
-          game.ownerToPlayer(bot.my_account)[player_struct.index("playerState")] == LUNGED)
+  assert (game.ownerToPlayer(bot.my_account)[player_struct.index("playerState")] == BRACED)
