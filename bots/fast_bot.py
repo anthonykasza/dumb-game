@@ -17,6 +17,3 @@ class Fast(Bot):
     self.de = 0
     self.ag = 10
     self.hp = 9
-
-  def select_target(self):
-    self.active_target = random.choice(opponents.keys())

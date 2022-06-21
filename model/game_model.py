@@ -52,7 +52,7 @@ class RandoAgent(Rando, mesa.Agent):
 
   def step(self):
     self.orient()
-#    self.do_rand_action()
+    self.do_rand_action()
 
 
 

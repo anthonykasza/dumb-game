@@ -120,9 +120,9 @@ contract Game {
 
     uint damage = 0;
     if (defendingPlayer.playerState == PLAYER_STATE.BRACED && defensePoints > 0) {
-      damage = offensePoints.div(defensePoints);
+      (,damage) = offensePoints.tryDiv(defensePoints);
     } else {
-      damage = offensePoints.sub(defensePoints);
+      (,damage) = offensePoints.trySub(defensePoints);
     }
 
     defendingPlayer.playerState == PLAYER_STATE.READY;

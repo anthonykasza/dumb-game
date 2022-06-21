@@ -16,7 +16,3 @@ class Cautious(Bot):
     self.de = 15
     self.ag = 1
     self.hp = 3
-
-
-  def select_target(self):
-    self.active_target = random.choice(opponents.keys())

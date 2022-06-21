@@ -19,10 +19,6 @@ class Rando(Bot):
     self.ak = 20 - (self.hp + self.de + self.ag)
 
 
-  def select_target(self):
-    self.active_target = random.choice(list(self.opponents.keys()))
-
-
   def do_rand_action(self):
     if not self.ready():
       return -1

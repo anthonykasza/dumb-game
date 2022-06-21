@@ -13,9 +13,16 @@ gameCost = '5 wei'
 
 def test_model():
   empty_model = GameModel()
+
+  aa = empty_model.game.ownerToPlayer(accounts[0])
+  ca = empty_model.game.ownerToPlayer(accounts[1])
+  ra1 = empty_model.game.ownerToPlayer(accounts[2])
+  ra2 = empty_model.game.ownerToPlayer(accounts[3])
+
   empty_model.step()
+
   # one of the agents should have done something after 1 step
-  assert (empty_model.game.ownerToPlayer(accounts[0])[player_struct.index("playerState")] != READY or
-          empty_model.game.ownerToPlayer(accounts[1])[player_struct.index("playerState")] != READY or
-          empty_model.game.ownerToPlayer(accounts[2])[player_struct.index("playerState")] != READY or
-          empty_model.game.ownerToPlayer(accounts[3])[player_struct.index("playerState")] != READY)
+  assert (aa[player_struct.index("playerState")] != READY or
+          ca[player_struct.index("playerState")] != READY or
+          ra1[player_struct.index("playerState")] != READY or
+          ra2[player_struct.index("playerState")] != READY)

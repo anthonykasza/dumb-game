@@ -2,6 +2,7 @@
 
 from brownie import accounts, Game, chain
 import time
+import random
 
 player_struct = ["ak", "de", "ag", "hp", "luck", "playerState", "prevActionBlock"]
 READY = 0
@@ -17,6 +18,8 @@ class Bot():
     self.opponents = {}
     self.active_target = None
     self.current_block = chain.height
+    self.am_alive = True
+
     self.ak = 0
     self.de = 0
     self.ag = 0
@@ -34,6 +37,9 @@ class Bot():
 
   def orient(self):
     self.current_block = chain.height
+    if self.game.ownerToPlayer(self.my_account)[player_struct.index("hp")] == 0:
+      self.am_alive = False
+
     player_count = self.game.playerCount()
     self.opponents = {}
     for i in range(player_count):
@@ -44,11 +50,11 @@ class Bot():
 
 
   def select_target(self):
-    pass
+    self.active_target = random.choice(list(self.opponents.keys()))
 
 
   def ready(self):
-    if len(self.opponents) == 0:
+    if len(self.opponents) == 0 or self.am_alive:
       return False
 
     p = self.game.ownerToPlayer(self.my_account)
@@ -60,13 +66,13 @@ class Bot():
 
     if p_status == BRACED:
       # 5 is a magic number. it is the braceDuration value from the updatePlayerState function in the Game contract
-      if chain.height - p_prev_block > 5:
+      if chain.height - p_prev_block > 6:
         return True
       else:
         return False
 
     elif p_status == LUNGED:
-      if chain.height - p_prev_block >= self.game.statsAllowance - self.ag:
+      if chain.height - p_prev_block >= self.game.statsAllowance() - self.ag:
         return True
       else:
         return False
