@@ -1,3 +1,5 @@
+# an aggressive bot that focusses on attack others
+
 import random
 from bots.base_bot import Bot
 from brownie import accounts, Game, chain

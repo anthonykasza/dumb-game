@@ -1,3 +1,5 @@
+# A bot that does things, mostly at random
+
 from bots.base_bot import Bot
 from brownie import accounts, Game, chain
 import time
@@ -22,6 +24,8 @@ class Rando(Bot):
 
 
   def do_rand_action(self):
+    if not self.ready():
+      return -1
     action = random.choice(range(2))
     if action == 0:
       self.select_target()

@@ -1,3 +1,5 @@
+# Base class for all Bots
+
 from brownie import accounts, Game, chain
 import time
 
@@ -8,11 +10,10 @@ LUNGED = 2
 
 class Bot():
   def __init__(self, **kw):
-    game_addr = kw['game_addr']
-    my_account = kw['my_account']
+    self.game_addr = kw['game_addr']
+    self.my_account = kw['my_account']
 
-    self.game = Game.at(game_addr)
-    self.my_account = my_account
+    self.game = Game.at(self.game_addr)
     self.opponents = {}
     self.active_target = None
     self.current_block = chain.height
@@ -41,17 +42,48 @@ class Bot():
       if player_addr != self.my_account.address and player[player_struct.index("hp")] > 0:
         self.opponents[self.game.players(i)] = self.game.ownerToPlayer(self.game.players(i))
 
+
   def select_target(self):
     pass
 
+
+  def ready(self):
+    if len(self.opponents) == 0:
+      return False
+
+    p = self.game.ownerToPlayer(self.my_account)
+    p_status = p[player_struct.index("playerState")]
+    p_prev_block = p[player_struct.index("prevActionBlock")]
+
+    if p_prev_block == 0:
+      return True
+
+    if p_status == BRACED:
+      # 5 is a magic number. it is the braceDuration value from the updatePlayerState function in the Game contract
+      if chain.height - p_prev_block > 5:
+        return True
+      else:
+        return False
+
+    elif p_status == LUNGED:
+      if chain.height - p_prev_block >= self.game.statsAllowance - self.ag:
+        return True
+      else:
+        return False
+
+    elif p_status == READY:
+      return True
+
+    else:
+      return True
+
+
   def hit(self):
-    # TODO: add logic that ensures a bot doesn't try to hit when it's LUNGED and cannot hit
-    if len(self.opponents) > 0:
-      self.game.hit(self.active_target, {'from':self.my_account})
+    if not self.ready():
+      return
+    self.game.hit(self.active_target, {'from':self.my_account})
 
   def brace(self):
-    previous_brace_block = self.game.ownerToPlayer(self.my_account)[player_struct.index("prevActionBlock")]
-    # the magic number 5 is the braceDuration from the Game contract's updatePlayerState function
-    # the magic number 0 is because the default value for prevActionBlock is zero
-    if previous_brace_block == 0 or previous_brace_block < chain.height - 5:
-      self.game.brace()
+    if not self.ready():
+      return
+    self.game.brace()

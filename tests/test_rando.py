@@ -40,4 +40,5 @@ def test_bot():
     assert player_state == BRACED
   elif action == 2:
     assert player_state == READY
-
+  elif action == -1:
+    assert player_state != READY
